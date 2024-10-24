@@ -21,18 +21,17 @@ namespace ECommerceClassLibrary.Controllers
             this.orderService = orderService;
             this.productService = productService;
             this.userService = userService;
-            orderService.OrderProcessed += Ashwin;
+            orderService.OrderProcessed += SendNotificationWhenOrderStatusChanged;
         }
 
-        private void Ashwin(object sender, OrderEventArgs e)
+        private void SendNotificationWhenOrderStatusChanged(object sender, OrderEventArgs e)
         {
             Customer user = (Customer)userService.GetUserById(e.CustomerId);
             user.notifications.Add($"\n\nNotification: Order ID {e.OrderId} is  now {e.Status}.\n\n");
         }
-
-
         public void ShowAllOrders()
         {
+            System.Console.WriteLine("======    Your Orders   ======");
             List<Order> AllOrders = orderService.ShowAllOrders();
             foreach (var order in AllOrders)
             {
@@ -42,26 +41,25 @@ namespace ECommerceClassLibrary.Controllers
 
         public void ShowCustomerOrders(User currentUser)
         {
-            orderService.GetCustomerOrders(currentUser);
+            List<Order> orders= orderService.GetCustomerOrders(currentUser);
+            DisplayOrders(orders);
         }
+
         public void ShowOrdersForSeller(User currentUser)
         {
-             Console.WriteLine("===== Your Orders =====");
             List<Order> orders = orderService.ShowSellerOrders(currentUser);
-
-            if (orders.Count == 0)
-            {
-                Console.WriteLine("No orders have been placed for your products.");
-                return;
-            }
-
-            DisplayOrders(orders);
+           DisplayOrders(orders);
 
         }
-
 
         public void DisplayOrders(List<Order> orders)
         {
+            Console.WriteLine("===== Your Orders =====");
+            if (orders.Count == 0)
+            {
+                Console.WriteLine("No orders placed yet..!!");
+                return;
+            }
             foreach (var order in orders)
             {
                 Console.WriteLine($"Order ID: {order.OrderId}, Customer ID: {order.CustomerId}, Total Amount: {order.TotalAmount}, Order Date: {order.OrderDate}, Order Status : {order.Status}");
@@ -69,6 +67,7 @@ namespace ECommerceClassLibrary.Controllers
                 foreach (var product in order.ProductListToBeOrdered)
                 {
                     Console.WriteLine($"Product ID: {product.Id}, Name: {product.Name}, Price: {product.Price}, Quantity: {product.Quantity}");
+                    Console.WriteLine("______________________________________________________________");
                 }
                 Console.WriteLine("------------------------------------------------------------");
             }
@@ -78,71 +77,85 @@ namespace ECommerceClassLibrary.Controllers
         {
             Console.WriteLine("===== Update Order Status =====");
 
-            List<Order> OrdersForSeller;
+            List<Order> sellerOrders = orderService.ShowSellerOrders(currentUser);
+            DisplayOrders(sellerOrders);
 
-            OrdersForSeller = orderService.ShowSellerOrders(currentUser);
-            if (OrdersForSeller.Count == 0)
+            int orderId = GetOrderIdFromUser();
+            if (orderId == -1) return;
+
+            Order orderToUpdate = orderService.GetOrderById(orderId);
+            if (orderToUpdate == null)
             {
-                Console.WriteLine("No orders available to update.");
+                Console.WriteLine("Order Not Found !!");
                 return;
             }
-            DisplayOrders(OrdersForSeller);
-            Console.Write("\n");
 
-            Console.WriteLine("Enter the Order ID you want to update: ");
+            int statusChoice = GetOrderStatusChoice(orderToUpdate);
+            if (statusChoice == -1) return;
 
+            UpdateOrderStatus(orderToUpdate, statusChoice);
+        }
+
+
+        private int GetOrderIdFromUser()
+        {
+            Console.WriteLine("\nEnter the Order ID you want to update: ");
             if (int.TryParse(Console.ReadLine(), out int orderId))
             {
-
-                Order orderToUpdate = orderService.GetOrderById(orderId);
-
-                if (orderToUpdate == null)
-                {
-                    System.Console.WriteLine("Order Not Found !!");
-                }
-                else
-                {
-
-                    Console.WriteLine("\nCurrent Status  : " + orderToUpdate.Status);
-
-                    Console.WriteLine("\nAvailable Order Statuses:");
-
-                    foreach (var status in Enum.GetValues(typeof(OrderStatus)))
-                    {
-                        Console.WriteLine($"{(int)status} - {status}");
-                    }
-                    Console.Write("Enter the status number to update the order: ");
-
-                    if (int.TryParse(Console.ReadLine(), out int statusChoice))
-                    {
-
-
-                        orderService.UpdateOrderStatus(orderToUpdate, statusChoice);
-                        Console.WriteLine("Order Status is Updated !!! ");
-
-                    }
-
-
-                }
+                return orderId;
             }
             else
             {
-                Console.WriteLine("Invalid Input.. ");
-
+                Console.WriteLine("Invalid Input..");
+                return -1;
             }
-
         }
 
+        private int GetOrderStatusChoice(Order orderToUpdate)
+        {
+            Console.WriteLine("\nCurrent Status: " + orderToUpdate.Status);
+            Console.WriteLine("\nAvailable Order Statuses:");
+
+            foreach (var status in Enum.GetValues(typeof(OrderStatus)))
+            {
+                Console.WriteLine($"{(int)status} - {status}");
+            }
+
+            Console.Write("Enter the status number to update the order: ");
+            if (int.TryParse(Console.ReadLine(), out int statusChoice))
+            {
+                return statusChoice;
+            }
+            else
+            {
+                Console.WriteLine("Invalid Input..");
+                return -1;
+            }
+        }
+
+        private void UpdateOrderStatus(Order orderToUpdate, int statusChoice)
+        {
+            orderService.UpdateOrderStatus(orderToUpdate, statusChoice);
+            Console.WriteLine("Order Status is Updated !!!");
+        }
 
         public async Task PlaceOrder(User currentUser)
         {
             Console.WriteLine("===== Place Order =====");
 
+            Product selectedProduct = GetSelectedProduct();
+            if (selectedProduct == null) return;
 
-            Product selectedProduct;
-            decimal quantity;
+            decimal quantity = GetOrderQuantity(selectedProduct);
+            if (quantity == 0) return;
 
+            if (!ConfirmOrder(selectedProduct, quantity)) return;
 
+            await ProcessOrder(selectedProduct, quantity, currentUser);
+        }
+
+        private Product GetSelectedProduct()
+        {
             while (true)
             {
                 Console.Write("\nEnter the Product ID you want to order: ");
@@ -154,74 +167,76 @@ namespace ECommerceClassLibrary.Controllers
                     continue;
                 }
 
-
-                selectedProduct = productService.GetProductById(productId);
-
-
-                if (selectedProduct == null)
+                Product product = productService.GetProductById(productId);
+                if (product == null)
                 {
                     Console.WriteLine("Invalid Product ID. Please try again.");
                     continue;
                 }
-                else
-                {
-                    Console.WriteLine($"\nSelected Product: {selectedProduct.Name}, Price: {selectedProduct.Price:C}");
 
-
-                    (decimal quantity1,bool b1) = ValidationHelper.GetValidatedDecimalInput("\nEnter the quantity you want to order: ");
-                    quantity = quantity1;
-                    if(!b1)
-                    {
-                        Console.WriteLine("Order Canceled..Try again..!!");
-                        return;
-                    }
-                    else if (quantity > selectedProduct.Quantity)
-                    {
-                        Console.WriteLine($"\nInsufficient stock. Only {selectedProduct.Quantity} units available. Please try again.");
-                        return;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
+                Console.WriteLine($"\nSelected Product: {product.Name}, Price: {product.Price:C}");
+                return product;
             }
+        }
+
+        private decimal GetOrderQuantity(Product selectedProduct)
+        {
+            (decimal quantity, bool isValid) = ValidationHelper.GetValidatedDecimalInput("\nEnter the quantity you want to order: ");
+
+            if (!isValid)
+            {
+                Console.WriteLine("Order Canceled.. Try again.");
+                return 0;
+            }
+
+            if (quantity > selectedProduct.Quantity)
+            {
+                Console.WriteLine($"\nInsufficient stock. Only {selectedProduct.Quantity} units available. Please try again.");
+                return 0;
+            }
+
+            return quantity;
+        }
+
+        private bool ConfirmOrder(Product selectedProduct, decimal quantity)
+        {
+            Console.WriteLine($"\n\n===== Order Summary =====");
+            Console.WriteLine($"Product: {selectedProduct.Name}");
+            Console.WriteLine($"Quantity: {quantity}");
+            Console.WriteLine($"Total Price: {selectedProduct.Price * quantity:C}");
+
+            Console.Write("Do you want to place the order? (yes to confirm): ");
+            string confirmation = Console.ReadLine().ToLower();
+
+            if (confirmation != "yes")
+            {
+                Console.WriteLine("Order canceled.");
+                return false;
+            }
+
+            return true;
+        }
+
+        private async Task ProcessOrder(Product selectedProduct, decimal quantity, User currentUser)
+        {
             try
             {
+                selectedProduct.Quantity -= quantity;
+                var orderedProducts = new List<Product>
+        {
+            new Product(selectedProduct.Id, selectedProduct.Name, selectedProduct.Description,
+                        selectedProduct.Price, quantity, selectedProduct.SellerId)
+        };
 
-
-                Console.WriteLine($"\n\n===== Order Summary =====");
-                Console.WriteLine($"Product: {selectedProduct.Name}");
-                Console.WriteLine($"Quantity: {quantity}");
-                Console.WriteLine($"Total Price: {selectedProduct.Price * quantity:C}");
-
-                Console.Write("Do you want to place the order? (yes : if you want to place): ");
-                string confirmation = Console.ReadLine().ToLower();
-
-                if (confirmation == "yes")
-                {
-                    selectedProduct.Quantity -= quantity;
-                    var orderedProduct = new List<Product>
-                 {
-            new Product(selectedProduct.Id,selectedProduct.Name,selectedProduct.Description,
-                                     selectedProduct.Price,quantity,selectedProduct.SellerId)
-                  };
-                    await orderService.PlaceOrder(orderedProduct, currentUser);
-                   
-                }
-                else
-                {
-                    Console.WriteLine("Order canceled.");
-                }
+                await orderService.PlaceOrder(orderedProducts, currentUser);
+                Console.WriteLine("Order placed successfully!");
             }
             catch (Exception e)
             {
-                System.Console.WriteLine(e.Message);
-
-                Console.ReadKey();
+                Console.WriteLine($"Error placing order: {e.Message}");
             }
-
         }
+
 
     }
 }

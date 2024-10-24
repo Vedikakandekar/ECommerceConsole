@@ -33,9 +33,6 @@ namespace ECommerceClassLibrary.Controllers
         {
             return ((User, bool))userService.ValidateUser(nm, pass, userType);
         }
-
-
-
         public void ShowProfile(User currentCustomer)
         {
             userService.ShowProfile(currentCustomer);
@@ -56,6 +53,7 @@ namespace ECommerceClassLibrary.Controllers
                 Console.WriteLine("Access denied !!");
             }
         }
+
         public void GetAllSellers(User currentUser)
         {
             if (currentUser.Role == "Admin")
@@ -67,6 +65,7 @@ namespace ECommerceClassLibrary.Controllers
                 Console.WriteLine("Access denied !!");
             }
         }
+
         public void GetAllUsers(User currentUser)
         {
             if (currentUser.Role == "Admin")
@@ -81,66 +80,84 @@ namespace ECommerceClassLibrary.Controllers
 
         public void DeleteUser()
         {
-
             userService.GetAllUsers();
-            
 
-            System.Console.WriteLine("Enter UserId to delete the User");
-            string str = Console.ReadLine();
-            if (!int.TryParse(str, out int userId))
+            int userId = GetUserIdForDeletion();
+            if (userId == -1)
             {
-                System.Console.WriteLine("Invalid choice...!!");
+                Console.WriteLine("Invalid UserId. Deletion aborted.");
                 return;
             }
 
-            else
+            User user = userService.GetUserById(userId);
+            if (user == null)
             {
-                User user = userService.GetUserById(userId);
-                if (user == null)
-                {
-                    System.Console.WriteLine("User Does Not Exist..!!");
-                }
-
-                else
-                 if (user.Role == "Admin")
-                {
-                    System.Console.WriteLine("Cannot Remove Admin..!!");
-                }
-                else
-                {
-
-                    if (user.Role == "Seller")
-                    {
-                        List<Product> sellerProducts = productService.GetSellerProducts(user);
-
-                        List<Order> sellerOrders = orderService.ShowSellerOrders(user);
-                        bool hasPendingOrders = sellerOrders.Any(o => o.ProductListToBeOrdered.Any(p => sellerProducts.Contains(p)) &&
-                                                                      (o.Status != OrderStatus.Delivered && o.Status != OrderStatus.Canceled));
-
-                        if (hasPendingOrders)
-                        {
-                            System.Console.WriteLine("Cannot delete seller. The seller has products in orders that are not delivered or canceled.");
-                            return;
-                        }
-                    }
-                    else if (user.Role == "Customer")
-                    {
-                        List<Order> customerOrders = orderService.GetCustomerOrders(user);
-                        bool hasPendingOrders = customerOrders.Any(o => o.Status != OrderStatus.Delivered && o.Status != OrderStatus.Canceled);
-
-                        if (hasPendingOrders)
-                        {
-                            System.Console.WriteLine("Cannot delete customer. The customer has pending orders that are not delivered or canceled.");
-                            return;
-                        }
-                    }
-
-
-                    userService.DeleteUser(user);
-
-                }
+                Console.WriteLine("User does not exist.");
+                return;
             }
 
+            if (!CanDeleteUser(user))
+            {
+                return;
+            }
+
+            userService.DeleteUser(user);
+            Console.WriteLine("User deleted successfully.");
         }
+
+        private int GetUserIdForDeletion()
+        {
+            Console.WriteLine("Enter UserId to delete the user:");
+            string input = Console.ReadLine();
+
+            if (int.TryParse(input, out int userId))
+            {
+                return userId;
+            }
+
+            return -1;
+        }
+
+        private bool CanDeleteUser(User user)
+        {
+            if (user.Role == "Admin")
+            {
+                Console.WriteLine("Cannot delete admin.");
+                return false;
+            }
+
+            if (user.Role == "Seller" && HasPendingSellerOrders(user))
+            {
+                Console.WriteLine("Cannot delete seller with pending orders.");
+                return false;
+            }
+
+            if (user.Role == "Customer" && HasPendingCustomerOrders(user))
+            {
+                Console.WriteLine("Cannot delete customer with pending orders.");
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool HasPendingSellerOrders(User seller)
+        {
+            List<Product> sellerProducts = productService.GetSellerProducts(seller);
+            List<Order> sellerOrders = orderService.ShowSellerOrders(seller);
+
+            return sellerOrders.Any(order =>
+                order.ProductListToBeOrdered.Any(product => sellerProducts.Contains(product)) &&
+                order.Status != OrderStatus.Delivered && order.Status != OrderStatus.Canceled);
+        }
+
+        private bool HasPendingCustomerOrders(User customer)
+        {
+            List<Order> customerOrders = orderService.GetCustomerOrders(customer);
+
+            return customerOrders.Any(order =>
+                order.Status != OrderStatus.Delivered && order.Status != OrderStatus.Canceled);
+        }
+
     }
 }

@@ -6,7 +6,7 @@ namespace ECommerce.Repositories
 {
     public interface IProductRepository
     {
-        void ShowAllProducts();
+         List<Product> GetAllProducts();
 
         List<Product> ShowSellerProducts(User seller);
 

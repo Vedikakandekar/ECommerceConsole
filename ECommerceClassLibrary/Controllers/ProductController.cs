@@ -37,94 +37,95 @@ namespace ECommerceClassLibrary.Controllers
 
         public void UpdateProduct(User currentUser)
         {
-            productService.GetSellerProducts(currentUser);
-            int count = productService.GetSellerProductCount(currentUser.UserId);
-            if (count > 0)
+            if (!HasSellerProducts(currentUser))
+                return;
+
+            int productId = GetProductIdFromUser("Enter the Product ID to update:");
+            if (productId != -1)
             {
-                Console.WriteLine("Enter the Product ID to update:");
-                if (int.TryParse(Console.ReadLine(), out int productId))
-                {
-                    productService.UpdateProduct(productId, currentUser);
-                }
-                else
-                {
-                    Console.WriteLine("Invalid Product ID. Please try again.");
-                }
+                productService.UpdateProduct(productId, currentUser);
             }
         }
 
         public void UpdateProductQuantity(User currentUser)
         {
-            productService.GetSellerProducts(currentUser);
-            int count = productService.GetSellerProductCount(currentUser.UserId);
-            if (count > 0)
+            if (!HasSellerProducts(currentUser))
+                return;
+
+            int productId = GetProductIdFromUser("Enter the Product ID to update quantity:");
+            if (productId != -1)
             {
-                Console.WriteLine("Enter the Product ID to update:");
-                if (int.TryParse(Console.ReadLine(), out int productId))
-                {
-                    productService.AddProductQuantity(productId);
-                }
-                else
-                {
-                    Console.WriteLine("Invalid Product ID. Please try again.");
-                }
+                productService.AddProductQuantity(productId);
             }
         }
 
         public void DeleteProduct(User currentUser)
         {
-            productService.GetSellerProducts(currentUser);
-            if (productService.GetSellerProductCount(currentUser.UserId) > 0)
+            if (!HasSellerProducts(currentUser))
+                return;
+
+            int productId = GetProductIdFromUser("Enter the Product ID to delete:");
+            if (productId != -1)
             {
-                Console.WriteLine("Enter the Product ID to Delete:");
-                if (int.TryParse(Console.ReadLine(), out int productId))
+                if (CanDeleteProduct(currentUser, productId))
                 {
-                    List<Order> orders = orderService.ShowSellerOrders(currentUser);
-                    var orderWithProduct = orders.Find(o => o.ProductListToBeOrdered.Any(p => p.Id == productId));
-                    if (orderWithProduct != null)
+                    if (productService.DeleteProduct(productId, currentUser))
                     {
-                        if (orderWithProduct.Status == OrderStatus.Delivered || orderWithProduct.Status == OrderStatus.Canceled)
-                        {
-
-                            if (productService.DeleteProduct(productId, currentUser))
-                            {
-                                Console.WriteLine("Product Deleted Succcessfully !! ");
-                            }
-                            else
-                            {
-                                Console.WriteLine("Invalid Product Id..");
-
-                            }
-                        }
-                        else
-                        {
-                            Console.WriteLine("Cannot delete product as it is part of an order that is not yet delivered or canceled.");
-                        }
+                        Console.WriteLine("Product deleted successfully!");
                     }
                     else
                     {
-                        if (productService.DeleteProduct(productId, currentUser))
-                        {
-                            Console.WriteLine("Product deleted successfully!");
-                        }
-                        else
-                        {
-                            Console.WriteLine("Invalid Product Id.");
-                        }
+                        Console.WriteLine("Invalid Product ID.");
                     }
                 }
-                else
-                {
-                    Console.WriteLine("Invalid Product Id.");
-                }
-
-            }
-            else
-            {
-                Console.WriteLine("No Products Available to delete");
             }
         }
 
+        private bool HasSellerProducts(User currentUser)
+        {
+            productService.GetSellerProducts(currentUser);
+            int count = productService.GetSellerProductCount(currentUser.UserId);
+            if (count == 0)
+            {
+                Console.WriteLine("No products available.");
+                return false;
+            }
+            return true;
+        }
 
+        private int GetProductIdFromUser(string promptMessage)
+        {
+            Console.WriteLine(promptMessage);
+            if (int.TryParse(Console.ReadLine(), out int productId))
+            {
+                return productId;
+            }
+            else
+            {
+                Console.WriteLine("Invalid Product ID. Please try again.");
+                return -1;
+            }
+        }
+
+        private bool CanDeleteProduct(User currentUser, int productId)
+        {
+            List<Order> orders = orderService.ShowSellerOrders(currentUser);
+            var orderWithProduct = orders.Find(o => o.ProductListToBeOrdered.Any(p => p.Id == productId));
+
+            if (orderWithProduct != null)
+            {
+                if (orderWithProduct.Status == OrderStatus.Delivered || orderWithProduct.Status == OrderStatus.Canceled)
+                {
+                    return true;
+                }
+                else
+                {
+                    Console.WriteLine("Cannot delete product as it is part of an order that is not yet delivered or canceled.");
+                    return false;
+                }
+            }
+            return true; 
+        }
     }
+
 }

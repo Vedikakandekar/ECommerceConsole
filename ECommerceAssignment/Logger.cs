@@ -5,7 +5,7 @@
 
     public static class Logger
     {
-        private static readonly string logFilePath = "C:\\Users\\Coditas-Admin\\source\\ECommerceConsoleApplication\\ECommerceAssignment\\app_log.txt";
+        private static readonly string logFilePath = "C:\\Users\\Coditas-Admin\\source\\ECommerceConsoleApplication\\ECommerceAssignment\\app_log.log";
 
         public static void LogError(string message)
         {

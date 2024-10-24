@@ -7,7 +7,7 @@ namespace ECommerceClassLibrary.Repositories.Contracts
     {
         void AddProduct(User currentUser);
 
-        void DisplayProduct(int id);
+        void DisplayProducts(List<Product> products);
 
         void ShowAllProducts();
         List<Product> GetSellerProducts(User currentUser);

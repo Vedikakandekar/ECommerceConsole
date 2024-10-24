@@ -1,0 +1,62 @@
+.vs
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio temporary files
+*.user
+*.suo
+*.sln.ide
+
+# Rider
+.idea/
+
+# Visual Studio Code
+.vscode/
+
+# User-specific files
+*.rsuser
+*.sln.docstates
+
+# DotNet
+*.dbmdl
+*.dbproj.schemaview
+*.jfm
+*.pdb
+*.pdb.bak
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/*
+!**/packages/build/packagereference.xml
+
+# Logs
+*.log
+
+# Output files
+*.exe
+*.dll
+*.appx
+*.appxbundle
+*.appxupload
+
+# Local History for JetBrains Rider
+.localhistory/
+
+# Rider specific files
+.idea/
+*.sln.iml
+
+# Miscellaneous files
+*.cache
+*.zip
+*.tar.gz
+*.rar
+*.gzip
+*.7z
+*.dSYM/

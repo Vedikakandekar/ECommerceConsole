@@ -40,45 +40,22 @@ namespace ECommerceClassLibrary.Repositories
             return false;
         }
 
-        public void ShowAllProducts()
+        public List<Product> GetAllProducts()
         {
-            Console.WriteLine("===== Product List =====");
-
-            if (_products.Count == 0)
-            {
-                Console.WriteLine("No products available.");
-            }
-            else
-            {
-                foreach (var product in _products)
-                {
-                    Console.WriteLine($"ID: {product.Id} ");
-                    Console.Write($"Name: {product.Name} ");
-                    Console.Write($"Description: {product.Description} ");
-                    Console.WriteLine($"Price: {product.Price} ");
-                    Console.WriteLine("---------------------------------------------------------");
-                }
-            }
+         
+            return _products;
 
         }
 
         public List<Product> ShowSellerProducts(User seller)
         {
-           
-
            return  _products.Where(p => p.SellerId == seller.UserId).ToList();
-
-
-            
-
         }
 
 
         public Product GetProductById(int id)
-        {
-           
+        {          
             Product prod = _products.FirstOrDefault(p => p.Id == id);
-          
             return prod;
         }
 

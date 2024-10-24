@@ -19,35 +19,23 @@ namespace ECommerceClassLibrary.Repositories
 
         public Product GetProductDetailsFromUser(User currentUser)
         {
-
             (string name,bool b1) = ValidationHelper.GetValidUserName("Enter Product Name: "); ;
             if(!b1)
                 return null;
-
             (string description,bool b2) = ValidationHelper.GetValidatedStringInput("Enter Product Description: ");
              if(!b2)
                 return null;
-
             (decimal price,bool b3) = ValidationHelper.GetValidatedDecimalInput("Enter Product Price: ");
             if(!b3)
                 return null;
             (decimal quantity,bool b4) = ValidationHelper.GetValidatedDecimalInput("Enter Product Quantity: ");
             if(!b4)
                 return null;
-
             int productCount = repository.GetAllProductCount();
-
             int newProductId = productCount > 0 ? productCount + 1 : 1;
-            return new Product
-            (
-                 newProductId,
-                 name,
-                 description,
-                 price,
-                 quantity,
-                 currentUser.UserId
-            );
+            return new Product(newProductId,name,description,price,quantity,currentUser.UserId);
         }
+
         public void AddProduct(User currentUser)
         {
             Console.WriteLine("===== Add New Product =====");
@@ -57,13 +45,28 @@ namespace ECommerceClassLibrary.Repositories
                 System.Console.WriteLine("Product Not added..");
                 return;
             }
-            
             repository.AddProduct(newProduct);
         }
 
-        public void DisplayProduct(int id)
+        public void DisplayProducts(List<Product> products)
         {
-            throw new NotImplementedException();
+            Console.WriteLine("===== Product List =====");
+
+            if (products.Count == 0)
+            {
+                Console.WriteLine("No products available.");
+            }
+            else
+            {
+                foreach (var product in products)
+                {
+                    Console.WriteLine($"ID: {product.Id} ");
+                    Console.Write($"Name: {product.Name} ");
+                    Console.Write($"Description: {product.Description} ");
+                    Console.WriteLine($"Price: {product.Price} ");
+                    Console.WriteLine("---------------------------------------------------------");
+                }
+            }
         }
 
         public Product GetProductById(int id)
@@ -73,7 +76,7 @@ namespace ECommerceClassLibrary.Repositories
 
         public void ShowAllProducts()
         {
-            repository.ShowAllProducts();
+           DisplayProducts(repository.GetAllProducts());
         }
 
         public int GetSellerProductCount(int userId)
@@ -148,8 +151,6 @@ namespace ECommerceClassLibrary.Repositories
 
         public bool UpdateProduct(int productId, User currentUser)
         {
-
-
             var product = repository.GetProductById(productId);
             if (product == null || product.SellerId!=currentUser.UserId)
             {

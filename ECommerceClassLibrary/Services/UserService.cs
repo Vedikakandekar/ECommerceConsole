@@ -22,85 +22,90 @@ namespace ECommerceClassLibrary.Services
         public Dictionary<string, string> GetUserDetails()
         {
             Dictionary<string, string> userParams = new Dictionary<string, string>();
-            string nm ;
-            Console.Write("Enter your name: ");
-            while (true)
-            {
 
-                nm = Console.ReadLine();
-                if(nm=="break")
-                {
-                    userParams["Name"] = null;
-                    return userParams;
-                }
-                if (!string.IsNullOrEmpty(nm) & repository.IsUserNameUnique(nm) & ValidationHelper.IsAlphabetic(nm))
-                {
-                    userParams["Name"] = nm;
-                    break;
-                }
-                Console.Clear();
-                Console.WriteLine("Invalid Username ..Enter Valid Username containing characters only, it should be unique\ntype 'break' to go to main menu");
-                Console.Write("Enter your name: ");
-            }
-
-
-
-            string email ;
-            Console.Write("Enter valid email: ");
-            while (true)
-            {
-
-                email = Console.ReadLine();
-                if (email == "break")
-                {
-                    userParams["Email"] = null;
-                    return userParams;
-                }
-                if (email.IsValidEmail())
-                {
-                    userParams["Email"] = email;
-                    break;
-                }
-                Console.Clear();
-                Console.WriteLine("Invalid Email ..Enter Valid Email..\ntype 'break' to go to main menu");
-                Console.Write("Enter valid email: ");
-            }
-
-            string phone;
-            Console.Write("Enter Valid phone number: ");
-            while (true)
-            {
-
-                phone = Console.ReadLine();
-                if (phone=="break")
-                {
-                    userParams["PhoneNumber"] = null;
-                    return userParams;
-                }
-                if (phone.IsValidPhoneNumber())
-                {
-                    userParams["PhoneNumber"] = phone;
-                    break;
-                }
-                Console.Clear();
-                Console.WriteLine("Invalid Phone ..Enter Valid Phone Number...\ntype 'break' to go to main menu");
-                Console.Write("Enter phone number: ");
-            }
+            userParams["Name"] = GetUserName();
+            userParams["Email"] = GetUserEmail();
+            userParams["PhoneNumber"] = GetUserPhoneNumber();
 
             Console.Write("Enter your password: ");
             userParams["Password"] = Console.ReadLine();
 
             return userParams;
-
-
         }
+
+        private string GetUserName()
+        {
+            string name;
+            Console.Write("Enter your name: ");
+
+            while (true)
+            {
+                name = Console.ReadLine();
+                if (name == "break") return null;
+
+                if (IsValidUserName(name))
+                {
+                    return name;
+                }
+
+                ShowInvalidInputMessage("Username", "should contain characters only, and be unique");
+            }
+        }
+
+        private string GetUserEmail()
+        {
+            string email;
+            Console.Write("Enter valid email: ");
+
+            while (true)
+            {
+                email = Console.ReadLine();
+                if (email == "break") return null;
+
+                if (email.IsValidEmail())
+                {
+                    return email;
+                }
+
+                ShowInvalidInputMessage("Email", "Enter a valid email");
+            }
+        }
+
+        private string GetUserPhoneNumber()
+        {
+            string phone;
+            Console.Write("Enter valid phone number: ");
+
+            while (true)
+            {
+                phone = Console.ReadLine();
+                if (phone == "break") return null;
+
+                if (phone.IsValidPhoneNumber())
+                {
+                    return phone;
+                }
+
+                ShowInvalidInputMessage("Phone", "Enter a valid phone number");
+            }
+        }
+
+        private void ShowInvalidInputMessage(string field, string message)
+        {
+            Console.Clear();
+            Console.WriteLine($"Invalid {field} ..{message}...\ntype 'break' to go to the main menu");
+            Console.Write($"Enter your {field}: ");
+        }
+
+        private bool IsValidUserName(string name)
+        {
+            return !string.IsNullOrEmpty(name) && repository.IsUserNameUnique(name) && ValidationHelper.IsAlphabetic(name);
+        }
+
 
         public void SignUp(string userType)
         {
             Console.WriteLine("===== Sign Up =====");
-
-
-
 
             int uid = repository.GetUserCount() + 1;
 
@@ -193,9 +198,9 @@ namespace ECommerceClassLibrary.Services
                 System.Console.WriteLine("There are no users yet..!!");
                 return;
             }
-            foreach (User seller in users)
+            foreach (User user in users)
             {
-                System.Console.WriteLine(seller.ToString());
+                System.Console.WriteLine(user.ToString());
             }
         }
 

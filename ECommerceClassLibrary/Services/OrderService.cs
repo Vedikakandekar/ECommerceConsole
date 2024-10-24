@@ -28,12 +28,12 @@ namespace ECommerceClassLibrary.Services
         {
             Console.WriteLine("Enter Shipping Address:");
 
-            
-          (string street, bool boolstreet) = ValidationHelper.GetValidatedStringInput("Street : ");
-            if (!boolstreet)
-                return new Address("", "", "","");
 
-           (string city,bool boolCity) = ValidationHelper.GetValidatedStringInput("City : ");
+            (string street, bool boolstreet) = ValidationHelper.GetValidatedStringInput("Street : ");
+            if (!boolstreet)
+                return new Address("", "", "", "");
+
+            (string city, bool boolCity) = ValidationHelper.GetValidatedStringInput("City : ");
             if (!boolCity)
                 return new Address("", "", "", "");
 
@@ -56,11 +56,9 @@ namespace ECommerceClassLibrary.Services
             return orderedProducts.Sum(product => product.Price);
         }
 
-        public Order CreateNewOrder(int userId, List<Product> orderedProducts,decimal totalAmount, Address shippingAddress,OrderStatus orderStatus)
-        {
-            return new Order(repository.GetOrderCount() + 1, userId, orderedProducts, totalAmount, shippingAddress, orderStatus);
-        }
-        public  async Task PlaceOrder(List<Product> orderedProducts, User currentUser)
+
+
+        public async Task PlaceOrder(List<Product> orderedProducts, User currentUser)
         {
 
             if (orderedProducts == null || orderedProducts.Count == 0)
@@ -70,16 +68,16 @@ namespace ECommerceClassLibrary.Services
             }
             decimal totalAmount = CalculateTotalAmount(orderedProducts);
 
-            Address shippingAddress= GetShippingAddress();
+            Address shippingAddress = GetShippingAddress();
 
-            if(shippingAddress.Street=="" ||shippingAddress.City==""|| shippingAddress.State==""|| shippingAddress.ZipCode=="")
+            if (shippingAddress.Street == "" || shippingAddress.City == "" || shippingAddress.State == "" || shippingAddress.ZipCode == "")
             {
                 Console.WriteLine("Shipping Address is not given. Order not placed.");
                 return;
             }
 
-            Order newOrder = CreateNewOrder(currentUser.UserId, orderedProducts, totalAmount,shippingAddress,OrderStatus.Pending);
-            
+            Order newOrder = new Order(repository.GetOrderCount() + 1, currentUser.UserId, orderedProducts, totalAmount, shippingAddress, OrderStatus.Pending);
+
             Console.WriteLine("\nProcessing your order, please wait...");
             try
             {
@@ -89,9 +87,9 @@ namespace ECommerceClassLibrary.Services
             }
             catch (Exception ex)
             {
-                System.Console.WriteLine(ex.ToString());    
+                System.Console.WriteLine(ex.ToString());
             }
-                
+
         }
 
         public int GetOrderCount()
@@ -104,19 +102,16 @@ namespace ECommerceClassLibrary.Services
 
         public List<Order> GetCustomerOrders(User currentUser)
         {
-            Console.WriteLine("===== Your Orders =====");
-
             List<Order> OrderList = repository.ShowCustomerOrders(currentUser);
 
             if (OrderList.Count == 0)
             {
-                Console.WriteLine("You have not placed any orders yet.");
+                return OrderList;
             }
             var sortedOrders = OrderList.OrderBy(order => order.OrderDate).ToList();
             foreach (var order in sortedOrders)
             {
                 Console.WriteLine(order.ToString());
-                Console.WriteLine("______________________________________________________________");
             }
 
             return sortedOrders;
@@ -124,9 +119,9 @@ namespace ECommerceClassLibrary.Services
 
         public void UpdateOrderStatus(Order orderToUpdate, int statusChoice)
         {
-            if(orderToUpdate.Status==OrderStatus.Delivered || orderToUpdate.Status == OrderStatus.Canceled)
+            if (orderToUpdate.Status == OrderStatus.Delivered || orderToUpdate.Status == OrderStatus.Canceled)
             {
-                Console.WriteLine("Order is "+orderToUpdate.Status+" Cannot change status");
+                Console.WriteLine("Order is " + orderToUpdate.Status + " Cannot change status");
                 return;
             }
             if (repository.UpdateOrderStatus(orderToUpdate, statusChoice))
@@ -158,13 +153,14 @@ namespace ECommerceClassLibrary.Services
 
                 if (sellerProductsInOrder.Count > 0)
                 {
-                    sellerOrders.Add(new Order(order.OrderId,order.CustomerId,sellerProductsInOrder,sellerProductsInOrder.Sum(p => p.Price * p.Quantity),order.ShippingAddress,order.Status));
+                    sellerOrders.Add(new Order(order.OrderId, order.CustomerId, sellerProductsInOrder, sellerProductsInOrder.Sum(p => p.Price * p.Quantity), order.ShippingAddress, order.Status));
                 }
             }
 
             return sellerOrders;
         }
     }
+
     public class OrderNotFoundException : Exception
     {
         public OrderNotFoundException()

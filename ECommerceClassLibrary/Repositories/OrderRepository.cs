@@ -44,7 +44,6 @@ namespace ECommerceClassLibrary.Repositories
         {
             if (IsOrderListEmpty())
             {
-               // Console.WriteLine("There aren't any Orders Placed yet.");
                 return new List<Order>();
             }
 
