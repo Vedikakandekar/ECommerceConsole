@@ -16,7 +16,7 @@ namespace ECommerceAssignment
         static UserController? userController;
         static ProductController? productController;
         static OrderController? orderController;
-        public Program()
+         static Program()
         {
             try
             {
@@ -36,6 +36,8 @@ namespace ECommerceAssignment
                 userController = serviceProvider.GetService<UserController>();
                 productController = serviceProvider.GetService<ProductController>();
                 orderController = serviceProvider.GetService<OrderController>();
+
+                
             }
             catch (Exception ex)
             {
@@ -72,7 +74,7 @@ namespace ECommerceAssignment
                 {
 
 
-                    Console.Clear();
+                   Console.Clear();
                     string str = """
             ===== Main Menu =====
             1. Customer
