@@ -6,11 +6,11 @@ namespace ECommerceClassLibrary.Models
 {
     public static class UserFactory
     {
-        public static User CreateUser(string userType, Dictionary<string, string> userParams, int uid)
+        public static User CreateUser(UserRole userType, Dictionary<string, string> userParams, int uid)
         {
-            switch (userType.ToLower())
+            switch (userType)
             {
-                case "customer":
+                case UserRole.Customer:
                     return new Customer
                     {
                         UserId = uid,
@@ -18,10 +18,11 @@ namespace ECommerceClassLibrary.Models
                         Email = userParams["Email"],
                         Password = userParams["Password"],
                         PhoneNumber = userParams["PhoneNumber"],
-                        Role = "Customer",
+                        Role = UserRole.Customer,
+                        Notifications = new List<string>()
                     };
 
-                case "admin":
+                case UserRole.Admin:
                     return new Admin
                     {
 
@@ -30,10 +31,10 @@ namespace ECommerceClassLibrary.Models
                         Email = userParams["Email"],
                         Password = userParams["Password"],
                         PhoneNumber = userParams["PhoneNumber"],
-                        Role = "Admin",
+                        Role = UserRole.Admin,
                     };
 
-                case "seller":
+                case UserRole.Seller:
                     return new Seller
                     {
 
@@ -42,7 +43,7 @@ namespace ECommerceClassLibrary.Models
                         Email = userParams["Email"],
                         Password = userParams["Password"],
                         PhoneNumber = userParams["PhoneNumber"],
-                        Role = "Seller",
+                        Role = UserRole.Seller,
                     };
 
                 default:

@@ -44,7 +44,7 @@ namespace ECommerceClassLibrary.Repositories
             return null;
         }
 
-        public (User, bool) ValidateUser(string unm, string pass, string userType)
+        public (User, bool) ValidateUser(string unm, string pass, UserRole userType)
         {
            
             foreach (var user in Users)
@@ -65,7 +65,7 @@ namespace ECommerceClassLibrary.Repositories
 
             Users.Add(user);
 
-            Console.WriteLine("Customer signed up successfully!");
+            Console.WriteLine("Users signed up successfully!");
 
 
         }

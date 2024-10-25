@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using ECommerceClassLibrary.Helper;
 using System.Text.RegularExpressions;
+using System.Runtime.Remoting.Messaging;
 
 namespace ECommerceClassLibrary.Services
 {
@@ -23,12 +24,21 @@ namespace ECommerceClassLibrary.Services
         {
             Dictionary<string, string> userParams = new Dictionary<string, string>();
 
-            userParams["Name"] = GetUserName();
+            userParams["Name"] = GetUserName() ;
+
+            if (userParams["Name"] == null) return null;
+            
             userParams["Email"] = GetUserEmail();
+
+            if (userParams["Email"] == null) return null;
+
             userParams["PhoneNumber"] = GetUserPhoneNumber();
+            if (userParams["PhoneNumber"] == null) return null;
+
 
             Console.Write("Enter your password: ");
             userParams["Password"] = Console.ReadLine();
+            if (userParams["Password"] == null) return null;
 
             return userParams;
         }
@@ -103,37 +113,40 @@ namespace ECommerceClassLibrary.Services
         }
 
 
-        public void SignUp(string userType)
+        public void SignUp(UserRole userType)
         {
-            Console.WriteLine("===== Sign Up =====");
+            Console.WriteLine("=====  Sign Up  =====");
 
             int uid = repository.GetUserCount() + 1;
 
             Dictionary<string, string> userParams = GetUserDetails();
-            if (userParams["Name"]==null || userParams["Email"] == null || userParams["PhoneNumber"]==null)
+            if (userParams["Name"]==null || userParams["Email"] == null || userParams["PhoneNumber"]==null || userParams["Password"] == null)
             {
                 System.Console.WriteLine("User Sign Up Failed...!!!");
                 return;
             }
             User user;
 
-            if (userType == "Customer")
+            switch (userType)
             {
-                user = UserFactory.CreateUser("Customer", userParams, uid);
-                this.repository.CustomerSignUp(user);
+                case UserRole.Customer:
+                    user = UserFactory.CreateUser(UserRole.Customer, userParams, uid);
+                    this.repository.CustomerSignUp(user);
+                    break;
+
+                case UserRole.Admin:
+                    user = UserFactory.CreateUser(UserRole.Admin, userParams, uid);
+                    this.repository.CustomerSignUp(user);
+                    break;
+                case UserRole.Seller:
+                    user = UserFactory.CreateUser(UserRole.Seller, userParams, uid);
+                    this.repository.CustomerSignUp(user);
+                    break;
+
+                default:
+                    throw new ArgumentException("Invalid user type");
             }
-            else
-                if (userType == "Admin")
-            {
-                user = UserFactory.CreateUser("Admin", userParams, uid);
-                this.repository.CustomerSignUp(user);
-            }
-            else
-                if (userType == "Seller")
-            {
-                user = UserFactory.CreateUser("Seller", userParams, uid);
-                this.repository.CustomerSignUp(user);
-            }
+
 
 
         }
@@ -153,7 +166,7 @@ namespace ECommerceClassLibrary.Services
             this.repository.ShowProfile(currentCustomer);
         }
 
-        public (User, bool) ValidateUser(string nm, string pass, string fromController)
+        public (User, bool) ValidateUser(string nm, string pass, UserRole fromController)
         {
             return repository.ValidateUser(nm, pass, fromController);
         }
@@ -206,8 +219,6 @@ namespace ECommerceClassLibrary.Services
 
         public void DeleteUser(User user)
         {
-
-
             repository.DeleteUser(user);
             System.Console.WriteLine("User Deleted Successfully !!!..");
 

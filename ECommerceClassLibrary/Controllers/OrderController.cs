@@ -27,7 +27,7 @@ namespace ECommerceClassLibrary.Controllers
         private void SendNotificationWhenOrderStatusChanged(object sender, OrderEventArgs e)
         {
             Customer user = (Customer)userService.GetUserById(e.CustomerId);
-            user.notifications.Add($"\n\nNotification: Order ID {e.OrderId} is  now {e.Status}.\n\n");
+            user.Notifications.Add($"\n\nNotification: Order ID {e.OrderId} is  now {e.Status}.\n\n");
         }
         public void ShowAllOrders()
         {
@@ -41,14 +41,14 @@ namespace ECommerceClassLibrary.Controllers
 
         public void ShowCustomerOrders(User currentUser)
         {
-            List<Order> orders= orderService.GetCustomerOrders(currentUser);
+            List<Order> orders = orderService.GetCustomerOrders(currentUser);
             DisplayOrders(orders);
         }
 
         public void ShowOrdersForSeller(User currentUser)
         {
             List<Order> orders = orderService.ShowSellerOrders(currentUser);
-           DisplayOrders(orders);
+            DisplayOrders(orders);
 
         }
 
@@ -78,10 +78,20 @@ namespace ECommerceClassLibrary.Controllers
             Console.WriteLine("===== Update Order Status =====");
 
             List<Order> sellerOrders = orderService.ShowSellerOrders(currentUser);
+            if (sellerOrders.Count == 0)
+            {
+                Console.WriteLine("Not Orders are placed yet !!!");
+                return;
+            }
             DisplayOrders(sellerOrders);
 
             int orderId = GetOrderIdFromUser();
-            if (orderId == -1) return;
+            if (orderId <= 0)
+
+            {
+                Console.WriteLine("Id is not valid");
+                return;
+            }
 
             Order orderToUpdate = orderService.GetOrderById(orderId);
             if (orderToUpdate == null)
@@ -158,12 +168,15 @@ namespace ECommerceClassLibrary.Controllers
         {
             while (true)
             {
-                Console.Write("\nEnter the Product ID you want to order: ");
+                Console.Write("\nEnter the Product ID you want to order: \n type break to cancel..");
                 string input = Console.ReadLine();
 
                 if (!int.TryParse(input, out int productId) || productId <= 0)
                 {
+                    if (input == "break")
+                        break;
                     Console.WriteLine("Invalid input. Please enter a valid numeric Product ID.");
+
                     continue;
                 }
 
@@ -177,24 +190,22 @@ namespace ECommerceClassLibrary.Controllers
                 Console.WriteLine($"\nSelected Product: {product.Name}, Price: {product.Price:C}");
                 return product;
             }
+            return null;
         }
 
         private decimal GetOrderQuantity(Product selectedProduct)
         {
             (decimal quantity, bool isValid) = ValidationHelper.GetValidatedDecimalInput("\nEnter the quantity you want to order: ");
-
             if (!isValid)
             {
                 Console.WriteLine("Order Canceled.. Try again.");
                 return 0;
             }
-
             if (quantity > selectedProduct.Quantity)
             {
                 Console.WriteLine($"\nInsufficient stock. Only {selectedProduct.Quantity} units available. Please try again.");
                 return 0;
             }
-
             return quantity;
         }
 
@@ -204,16 +215,13 @@ namespace ECommerceClassLibrary.Controllers
             Console.WriteLine($"Product: {selectedProduct.Name}");
             Console.WriteLine($"Quantity: {quantity}");
             Console.WriteLine($"Total Price: {selectedProduct.Price * quantity:C}");
-
             Console.Write("Do you want to place the order? (yes to confirm): ");
             string confirmation = Console.ReadLine().ToLower();
-
             if (confirmation != "yes")
             {
                 Console.WriteLine("Order canceled.");
                 return false;
             }
-
             return true;
         }
 
@@ -227,7 +235,6 @@ namespace ECommerceClassLibrary.Controllers
             new Product(selectedProduct.Id, selectedProduct.Name, selectedProduct.Description,
                         selectedProduct.Price, quantity, selectedProduct.SellerId)
         };
-
                 await orderService.PlaceOrder(orderedProducts, currentUser);
                 Console.WriteLine("Order placed successfully!");
             }

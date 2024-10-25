@@ -12,7 +12,7 @@ namespace ECommerceClassLibrary.Models
             this.UserId = id;
             this.Name = name;
             this.Password = password;
-            Role = "Seller";
+            Role = UserRole.Seller;
             this.PhoneNumber = phone;
         }
 

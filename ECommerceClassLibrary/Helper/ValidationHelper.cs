@@ -48,7 +48,7 @@ namespace ECommerceClassLibrary.Helper
                 {
                     
                     Console.WriteLine("Invalid input. Please enter a valid string.\nType 'break' to go back");
-                    ;
+                    
                 }
                
 

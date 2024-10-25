@@ -11,7 +11,7 @@
         private string password;
         public string phoneNumber { get; set; }
 
-        private string role;
+        private UserRole role;
 
         public string Name
         {
@@ -43,11 +43,17 @@
             set => password = value;
         }
 
-        public string Role
+        public UserRole Role
         {
             get => role;
             set => role = value;
         }
 
+    }
+
+   public enum UserRole {
+        Admin = 1,
+        Customer = 2,
+        Seller = 3,
     }
 }

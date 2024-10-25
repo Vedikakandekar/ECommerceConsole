@@ -24,12 +24,12 @@ namespace ECommerceClassLibrary.Controllers
             this.orderService = orderService;
         }
 
-        public void AddUser(string userType)
+        public void AddUser(UserRole userType)
         {
             this.userService.SignUp(userType);
         }
 
-        public (User, bool) ValidateUser(string nm, string pass, string userType)
+        public (User, bool) ValidateUser(string nm, string pass, UserRole userType)
         {
             return ((User, bool))userService.ValidateUser(nm, pass, userType);
         }
@@ -45,7 +45,7 @@ namespace ECommerceClassLibrary.Controllers
 
         public void GetAllCustomer(User currentUser)
         {
-            if (currentUser.Role == "Admin") {
+            if (currentUser.Role == UserRole.Admin) {
                 userService.GetAllCustomers();
             }
             else
@@ -56,7 +56,7 @@ namespace ECommerceClassLibrary.Controllers
 
         public void GetAllSellers(User currentUser)
         {
-            if (currentUser.Role == "Admin")
+            if (currentUser.Role == UserRole.Admin)
             {
                 userService.GetAllSellers();
             }
@@ -68,7 +68,7 @@ namespace ECommerceClassLibrary.Controllers
 
         public void GetAllUsers(User currentUser)
         {
-            if (currentUser.Role == "Admin")
+            if (currentUser.Role == UserRole.Admin)
             {
                 userService.GetAllUsers();
             }
@@ -120,19 +120,19 @@ namespace ECommerceClassLibrary.Controllers
 
         private bool CanDeleteUser(User user)
         {
-            if (user.Role == "Admin")
+            if (user.Role == UserRole.Admin)
             {
                 Console.WriteLine("Cannot delete admin.");
                 return false;
             }
 
-            if (user.Role == "Seller" && HasPendingSellerOrders(user))
+            if (user.Role == UserRole.Seller && HasPendingSellerOrders(user))
             {
                 Console.WriteLine("Cannot delete seller with pending orders.");
                 return false;
             }
 
-            if (user.Role == "Customer" && HasPendingCustomerOrders(user))
+            if (user.Role == UserRole.Customer && HasPendingCustomerOrders(user))
             {
                 Console.WriteLine("Cannot delete customer with pending orders.");
                 return false;

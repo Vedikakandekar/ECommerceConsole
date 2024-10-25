@@ -109,13 +109,14 @@ namespace ECommerceClassLibrary.Services
                 return OrderList;
             }
             var sortedOrders = OrderList.OrderBy(order => order.OrderDate).ToList();
-            foreach (var order in sortedOrders)
-            {
-                Console.WriteLine(order.ToString());
-            }
+            //foreach (var order in sortedOrders)
+            //{
+            //    Console.WriteLine(order.ToString());
+            //}
 
             return sortedOrders;
         }
+
 
         public void UpdateOrderStatus(Order orderToUpdate, int statusChoice)
         {

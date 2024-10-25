@@ -65,10 +65,14 @@ namespace ECommerceClassLibrary.Controllers
                 return;
 
             int productId = GetProductIdFromUser("Enter the Product ID to delete:");
-            if (productId != -1)
-            {
-                if (CanDeleteProduct(currentUser, productId))
-                {
+
+            if (productId <= -1)
+                return;
+
+            if (!CanDeleteProduct(currentUser, productId))
+                return;
+
+
                     if (productService.DeleteProduct(productId, currentUser))
                     {
                         Console.WriteLine("Product deleted successfully!");
@@ -77,8 +81,6 @@ namespace ECommerceClassLibrary.Controllers
                     {
                         Console.WriteLine("Invalid Product ID.");
                     }
-                }
-            }
         }
 
         private bool HasSellerProducts(User currentUser)
@@ -112,8 +114,10 @@ namespace ECommerceClassLibrary.Controllers
             List<Order> orders = orderService.ShowSellerOrders(currentUser);
             var orderWithProduct = orders.Find(o => o.ProductListToBeOrdered.Any(p => p.Id == productId));
 
-            if (orderWithProduct != null)
-            {
+            if (orderWithProduct == null)
+                return true;
+
+                
                 if (orderWithProduct.Status == OrderStatus.Delivered || orderWithProduct.Status == OrderStatus.Canceled)
                 {
                     return true;
@@ -123,8 +127,7 @@ namespace ECommerceClassLibrary.Controllers
                     Console.WriteLine("Cannot delete product as it is part of an order that is not yet delivered or canceled.");
                     return false;
                 }
-            }
-            return true; 
+           
         }
     }
 

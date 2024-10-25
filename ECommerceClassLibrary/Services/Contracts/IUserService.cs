@@ -6,9 +6,9 @@ namespace ECommerceClassLibrary.Services.Contracts
     {
         User GetUserById(int id);
 
-        (User, bool) ValidateUser(string nm, string pass, string fromController);
+        (User, bool) ValidateUser(string nm, string pass, UserRole userRole);
 
-        void SignUp(string userType);
+        void SignUp(UserRole userType);
         void ShowProfile(User currentCustomer);
         void EditProfile(User currentCustomer, string feild, dynamic newValue);
 

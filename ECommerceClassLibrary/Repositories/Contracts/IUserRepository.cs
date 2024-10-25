@@ -7,7 +7,7 @@ namespace ECommerceClassLibrary.Repositories.Contracts
     {
         User GetUserById(int id);
 
-        (User, bool) ValidateUser(string unm, string pass, string userType);
+        (User, bool) ValidateUser(string unm, string pass, UserRole userType);
         void CustomerSignUp(User user);
         void ShowProfile(User currentCustomer);
         void EditProfile(User currentCustomer, string feild, dynamic newValue);
