@@ -29,9 +29,9 @@ namespace ECommerceClassLibrary.Controllers
             this.userService.SignUp(userType);
         }
 
-        public (User, bool) ValidateUser(string nm, string pass, UserRole userType)
+        public (User, bool) ValidateUser(string name, string password, UserRole userType)
         {
-            return ((User, bool))userService.ValidateUser(nm, pass, userType);
+            return ((User, bool))userService.ValidateUser(name, password, userType);
         }
         public void ShowProfile(User currentCustomer)
         {

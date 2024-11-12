@@ -38,8 +38,9 @@ namespace ECommerceClassLibrary.Controllers
         public void UpdateProduct(User currentUser)
         {
             if (!HasSellerProducts(currentUser))
+            {
                 return;
-
+            }
             int productId = GetProductIdFromUser("Enter the Product ID to update:");
             if (productId != -1)
             {
@@ -50,8 +51,9 @@ namespace ECommerceClassLibrary.Controllers
         public void UpdateProductQuantity(User currentUser)
         {
             if (!HasSellerProducts(currentUser))
+            {
                 return;
-
+            }
             int productId = GetProductIdFromUser("Enter the Product ID to update quantity:");
             if (productId != -1)
             {
@@ -62,16 +64,19 @@ namespace ECommerceClassLibrary.Controllers
         public void DeleteProduct(User currentUser)
         {
             if (!HasSellerProducts(currentUser))
+            {
                 return;
-
+            }
             int productId = GetProductIdFromUser("Enter the Product ID to delete:");
 
             if (productId <= -1)
+            {
                 return;
-
+            }
             if (!CanDeleteProduct(currentUser, productId))
+            {
                 return;
-
+            }
 
                     if (productService.DeleteProduct(productId, currentUser))
                     {
@@ -115,8 +120,9 @@ namespace ECommerceClassLibrary.Controllers
             var orderWithProduct = orders.Find(o => o.ProductListToBeOrdered.Any(p => p.Id == productId));
 
             if (orderWithProduct == null)
+            {
                 return true;
-
+            }
                 
                 if (orderWithProduct.Status == OrderStatus.Delivered || orderWithProduct.Status == OrderStatus.Canceled)
                 {

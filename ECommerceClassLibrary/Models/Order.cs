@@ -26,14 +26,11 @@ namespace ECommerceClassLibrary.Models
             Status = status;
         }
 
-        public Order()
-        {
-        }
-
         public override string ToString()
         {
             return $"Order ID: {OrderId}, Total Amount: {TotalAmount:C}, Date: {OrderDate}, Status: {Status}, \nShipping Address: {ShippingAddress}, \nProduct Name: {ProductListToBeOrdered[0].Name}, Quantity: {ProductListToBeOrdered[0].Quantity}";
         }
+        public Order(){}
     }
 
 

@@ -59,6 +59,10 @@
     <Compile Include="Controllers\OrderController.cs" />
     <Compile Include="Controllers\ProductController.cs" />
     <Compile Include="Controllers\UserController.cs" />
+    <Compile Include="Helper\MenuConstants\AdminMenu.cs" />
+    <Compile Include="Helper\MenuConstants\CustomerMenu.cs" />
+    <Compile Include="Helper\MenuConstants\GeneralUserMenu.cs" />
+    <Compile Include="Helper\MenuConstants\SellerMenu.cs" />
     <Compile Include="Helper\OrderEventsArgs.cs" />
     <Compile Include="Helper\StringExtensions.cs" />
     <Compile Include="Helper\ValidationHelper.cs" />

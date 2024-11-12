@@ -2,6 +2,7 @@
 using ECommerce.Repositories;
 using ECommerceClassLibrary.Controllers;
 using ECommerceClassLibrary.Helper;
+using ECommerceClassLibrary.Helper.MenuEnums;
 using ECommerceClassLibrary.Models;
 using ECommerceClassLibrary.Repositories;
 using ECommerceClassLibrary.Repositories.Contracts;
@@ -86,16 +87,16 @@ namespace ECommerceAssignment
         {
             switch (choice)
             {
-                case 1:
+                case UserRoleMenu.Customer:
                     await ShowSignUpSignInMenu(UserRole.Customer);
                     break;
-                case 2:
+                case UserRoleMenu.Seller:
                     await ShowSignUpSignInMenu(UserRole.Seller);
                     break;
-                case 3:
+                case UserRoleMenu.Admin:
                     await ShowSignUpSignInMenu(UserRole.Admin);
                     break;
-                case 4:
+                case UserRoleMenu.Exit:
                     Console.WriteLine("Exiting Application...");
                     Logger.LogInfo("Application exited by user.");
                     Environment.Exit(0);
@@ -119,16 +120,16 @@ namespace ECommerceAssignment
             int choice = ValidationHelper.GetValidatedNumberInput("Enter choice: ");
             switch (choice)
             {
-                case 1:
+                case UserActionMenu.SignUp:
                     await SignUp(userType);
                     break;
-                case 2:
+                case UserActionMenu.SignIn:
                     await SignIn(userType);
                     break;
-                case 3:
+                case UserActionMenu.BackToMainMenu:
                     await ShowMainMenu();
                     break;
-                case 4:
+                case UserActionMenu.Exit:
                     Console.WriteLine("Exiting Application...");
                     Logger.LogInfo("Application exited by user.");
                     Environment.Exit(0);
@@ -151,11 +152,15 @@ namespace ECommerceAssignment
         private static async Task SignIn(UserRole userType)
         {
             var (username, validUsername) = ValidationHelper.GetValidUserName("Enter Username: ");
-            if (!validUsername) return;
-
+            if (!validUsername)
+            {
+                return;
+            }
             var (password, validPassword) = ValidationHelper.GetValidUserName("Enter Password: ");
-            if (!validPassword) return;
-
+            if (!validPassword)
+            {
+                return;
+            }
             var (currentUser, isValid) = userController?.ValidateUser(username, password, userType) ?? (null, false);
 
             if (isValid && currentUser != null)
@@ -211,31 +216,31 @@ namespace ECommerceAssignment
                 choice = ValidationHelper.GetValidatedNumberInput(prompt);
                 switch (choice)
                 {
-                    case 1:
+                    case AdminMenuOptions.ShowProducts:
                         productController?.ShowAllProducts();
                         await Pause();
                         break;
-                    case 2:
+                    case AdminMenuOptions.ShowOrders:
                         orderController?.ShowAllOrders();
                         await Pause();
                         break;
-                    case 3:
+                    case AdminMenuOptions.ShowCustomers:
                         userController?.GetAllCustomer(currentUser);
                         await Pause();
                         break;
-                    case 4:
+                    case AdminMenuOptions.ShowSellers:
                         userController?.GetAllSellers(currentUser);
                         await Pause();
                         break;
-                    case 5:
+                    case AdminMenuOptions.DeleteUser:
                         userController?.DeleteUser();
                         await Pause();
                         break;
-                    case 6:
+                    case AdminMenuOptions.Logout:
                         Console.WriteLine("Logging out...");
                         await ShowMainMenu();
                         return;
-                    case 7:
+                    case AdminMenuOptions.ExitApplication:
                         ExitApplication();
                         return;
                     default:
@@ -272,32 +277,32 @@ namespace ECommerceAssignment
                 choice = ValidationHelper.GetValidatedNumberInput(prompt);
                 switch (choice)
                 {
-                    case 1:
+                    case CustomerMenuOptions.ShowProducts:
                         productController?.ShowAllProducts();
                         await Pause();
                         break;
-                    case 2:
+                    case CustomerMenuOptions.PlaceOrder:
                         productController?.ShowAllProducts();
                         await orderController?.PlaceOrder(currentUser);
                         await Pause();
                         break;
-                    case 3:
+                    case CustomerMenuOptions.ViewOrders:
                         orderController?.ShowCustomerOrders(currentUser);
                         await Pause();
                         break;
-                    case 4:
+                    case CustomerMenuOptions.ShowProfile:
                         userController?.ShowProfile(currentUser);
                         await Pause();
                         break;
-                    case 5:
+                    case CustomerMenuOptions.EditProfile:
                         await EditProfile(currentUser);
                         await Pause();
                         break;
-                    case 6:
+                    case CustomerMenuOptions.Logout:
                         Console.WriteLine("Logging out...");
                         await ShowMainMenu();
                         return;
-                    case 7:
+                    case CustomerMenuOptions.ExitApplication:
                         ExitApplication();
                         return;
                     default:
@@ -343,19 +348,19 @@ namespace ECommerceAssignment
             int choice = ValidationHelper.GetValidatedNumberInput(str);
             switch (choice)
             {
-                case 1:
+                case ProfileEditMenuOptions.EditName:
                     await EditUserProfile("Name", ValidationHelper.GetValidUserName("Enter new name: "), currentUser);
                     break;
-                case 2:
+                case ProfileEditMenuOptions.EditEmail:
                     await EditUserProfile("Email", ValidationHelper.GetValidatedEmail("Enter new email: "), currentUser);
                     break;
-                case 3:
+                case ProfileEditMenuOptions.EditPassword:
                     await EditPassword(currentUser);
                     break;
-                case 4:
+                case ProfileEditMenuOptions.EditPhoneNumber:
                     await EditUserProfile("Phone", ValidationHelper.GetValidUserName("Enter new Phone Number: "), currentUser);
                     break;
-                case 5:
+                case ProfileEditMenuOptions.Back:
                     return;
                 default:
                     await InvalidChoice();
@@ -374,15 +379,17 @@ namespace ECommerceAssignment
 
         private static async Task EditPassword(User currentUser)
         {
-            (string unm1, bool b1) = ValidationHelper.GetValidUserName("Enter current password: ");
-            if (b1 && unm1 == currentUser.Password)
+            (string userName, bool isValidInput) = ValidationHelper.GetValidUserName("Enter current password: ");
+            if (isValidInput && userName == currentUser.Password)
             {
-                (string newPassword, bool b5) = ValidationHelper.GetValidatedStringInput("Enter new password: ");
-                if (!b5)
+                (string newPassword, bool isValidPasswordInput) = ValidationHelper.GetValidatedStringInput("Enter new password: ");
+                if (!isValidPasswordInput)
+                {
                     return;
+                }
 
-                    userController?.EditProfile(currentUser, "Password", newPassword);
-                    await Pause();
+                userController?.EditProfile(currentUser, "Password", newPassword);
+                await Pause();
             }
             else
             {
@@ -428,39 +435,39 @@ namespace ECommerceAssignment
         {
             switch (choice)
             {
-                case 1:
+                case SellerMenuOptions.AddProduct:
                     productController?.AddProduct(currentUser); break;
 
-                case 2:
+                case SellerMenuOptions.UpdateProduct:
                     productController?.UpdateProduct(currentUser); break;
 
-                case 3:
+                case SellerMenuOptions.UpdateProductQuantity:
                     productController?.UpdateProductQuantity(currentUser); break;
 
-                case 4:
+                case SellerMenuOptions.ShowOrders:
                     orderController?.ShowOrdersForSeller(currentUser); break;
 
-                case 5:
+                case SellerMenuOptions.ShowProducts:
                     productController?.ShowSellerProducts(currentUser); break;
 
-                case 6:
+                case SellerMenuOptions.UpdateOrderStatus:
                     orderController?.UpdateOrderStatus(currentUser); break;
 
-                case 7:
+                case SellerMenuOptions.DeleteProduct:
                     productController?.DeleteProduct(currentUser); break;
 
-                case 8:
+                case SellerMenuOptions.ShowProfile:
                     userController?.ShowProfile(currentUser); break;
 
-                case 9:
+                case SellerMenuOptions.EditProfile:
                     await EditProfile(currentUser); break;
 
-                case 10:
+                case SellerMenuOptions.Logout:
                     Console.WriteLine("Logging out...");
                     await ShowMainMenu();
                     break;
 
-                case 11:
+                case SellerMenuOptions.ExitApplication:
                     ExitApplication(); break;
 
                 default:

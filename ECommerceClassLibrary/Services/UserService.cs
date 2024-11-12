@@ -26,20 +26,28 @@ namespace ECommerceClassLibrary.Services
 
             userParams["Name"] = GetUserName() ;
 
-            if (userParams["Name"] == null) return null;
-            
+            if (string.IsNullOrEmpty(userParams["Name"]))
+            {
+                return userParams;
+            }
             userParams["Email"] = GetUserEmail();
 
-            if (userParams["Email"] == null) return null;
-
+            if (string.IsNullOrEmpty(userParams["Email"]))
+            {
+                return userParams;
+            }
             userParams["PhoneNumber"] = GetUserPhoneNumber();
-            if (userParams["PhoneNumber"] == null) return null;
-
+            if (string.IsNullOrEmpty(userParams["PhoneNumber"]))
+            {
+                return userParams;
+            }
 
             Console.Write("Enter your password: ");
             userParams["Password"] = Console.ReadLine();
-            if (userParams["Password"] == null) return null;
-
+            if (string.IsNullOrEmpty(userParams["Password"]))
+            {
+                return userParams;
+            }
             return userParams;
         }
 
@@ -51,8 +59,10 @@ namespace ECommerceClassLibrary.Services
             while (true)
             {
                 name = Console.ReadLine();
-                if (name == "break") return null;
-
+                if (name == "break")
+                {
+                    return "";
+                }
                 if (IsValidUserName(name))
                 {
                     return name;
@@ -70,8 +80,10 @@ namespace ECommerceClassLibrary.Services
             while (true)
             {
                 email = Console.ReadLine();
-                if (email == "break") return null;
-
+                if (email == "break")
+                {
+                    return "";
+                }
                 if (email.IsValidEmail())
                 {
                     return email;
@@ -89,8 +101,10 @@ namespace ECommerceClassLibrary.Services
             while (true)
             {
                 phone = Console.ReadLine();
-                if (phone == "break") return null;
-
+                if (phone == "break")
+                {
+                    return "";
+                }
                 if (phone.IsValidPhoneNumber())
                 {
                     return phone;
@@ -120,7 +134,7 @@ namespace ECommerceClassLibrary.Services
             int uid = repository.GetUserCount() + 1;
 
             Dictionary<string, string> userParams = GetUserDetails();
-            if (userParams["Name"]==null || userParams["Email"] == null || userParams["PhoneNumber"]==null || userParams["Password"] == null)
+            if (string.IsNullOrEmpty(userParams["Name"]) || string.IsNullOrEmpty(userParams["Email"]) || string.IsNullOrEmpty(userParams["PhoneNumber"]) || string.IsNullOrEmpty(userParams["Password"]))
             {
                 System.Console.WriteLine("User Sign Up Failed...!!!");
                 return;
@@ -224,7 +238,6 @@ namespace ECommerceClassLibrary.Services
 
         }
     }
-
 
 
 }

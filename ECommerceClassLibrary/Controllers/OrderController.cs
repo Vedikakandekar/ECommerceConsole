@@ -101,8 +101,10 @@ namespace ECommerceClassLibrary.Controllers
             }
 
             int statusChoice = GetOrderStatusChoice(orderToUpdate);
-            if (statusChoice == -1) return;
-
+            if (statusChoice == -1)
+            {
+                return;
+            }
             UpdateOrderStatus(orderToUpdate, statusChoice);
         }
 
@@ -154,13 +156,19 @@ namespace ECommerceClassLibrary.Controllers
             Console.WriteLine("===== Place Order =====");
 
             Product selectedProduct = GetSelectedProduct();
-            if (selectedProduct == null) return;
-
+            if (selectedProduct == null)
+            {
+                return;
+            }
             decimal quantity = GetOrderQuantity(selectedProduct);
-            if (quantity == 0) return;
-
-            if (!ConfirmOrder(selectedProduct, quantity)) return;
-
+            if (quantity == 0)
+            {
+                return;
+            }
+            if (!ConfirmOrder(selectedProduct, quantity))
+            {
+                return;
+            }
             await ProcessOrder(selectedProduct, quantity, currentUser);
         }
 
@@ -174,7 +182,7 @@ namespace ECommerceClassLibrary.Controllers
                 if (!int.TryParse(input, out int productId) || productId <= 0)
                 {
                     if (input == "break")
-                        break;
+                    { break; }
                     Console.WriteLine("Invalid input. Please enter a valid numeric Product ID.");
 
                     continue;

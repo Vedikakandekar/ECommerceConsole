@@ -19,28 +19,36 @@ namespace ECommerceClassLibrary.Repositories
 
         public Product GetProductDetailsFromUser(User currentUser)
         {
-            (string name,bool b1) = ValidationHelper.GetValidUserName("Enter Product Name: "); ;
-            if(!b1)
+            (string name, bool isNameValid) = ValidationHelper.GetValidUserName("Enter Product Name: "); ;
+            if (!isNameValid)
+            {
                 return null;
-            (string description,bool b2) = ValidationHelper.GetValidatedStringInput("Enter Product Description: ");
-             if(!b2)
+            }
+            (string description, bool isDescriptionValid) = ValidationHelper.GetValidatedStringInput("Enter Product Description: ");
+            if (!isDescriptionValid)
+            {
                 return null;
-            (decimal price,bool b3) = ValidationHelper.GetValidatedDecimalInput("Enter Product Price: ");
-            if(!b3)
+            }
+            (decimal price, bool isPriceValid) = ValidationHelper.GetValidatedDecimalInput("Enter Product Price: ");
+            if (!isPriceValid)
+            {
                 return null;
-            (decimal quantity,bool b4) = ValidationHelper.GetValidatedDecimalInput("Enter Product Quantity: ");
-            if(!b4)
+            }
+            (decimal quantity, bool isQuantityValid) = ValidationHelper.GetValidatedDecimalInput("Enter Product Quantity: ");
+            if (!isQuantityValid)
+            {
                 return null;
+            }
             int productCount = repository.GetAllProductCount();
             int newProductId = productCount > 0 ? productCount + 1 : 1;
-            return new Product(newProductId,name,description,price,quantity,currentUser.UserId);
+            return new Product(newProductId, name, description, price, quantity, currentUser.UserId);
         }
 
         public void AddProduct(User currentUser)
         {
             Console.WriteLine("===== Add New Product =====");
             Product newProduct = GetProductDetailsFromUser(currentUser);
-            if(newProduct==null)
+            if (newProduct == null)
             {
                 System.Console.WriteLine("Product Not added..");
                 return;
@@ -76,12 +84,12 @@ namespace ECommerceClassLibrary.Repositories
 
         public void ShowAllProducts()
         {
-           DisplayProducts(repository.GetAllProducts());
+            DisplayProducts(repository.GetAllProducts());
         }
 
         public int GetSellerProductCount(int userId)
         {
-           return repository.GetSellerProductCount(userId);
+            return repository.GetSellerProductCount(userId);
         }
 
         public List<Product> GetSellerProducts(User currentUser)
@@ -152,14 +160,14 @@ namespace ECommerceClassLibrary.Repositories
         public bool UpdateProduct(int productId, User currentUser)
         {
             var product = repository.GetProductById(productId);
-            if (product == null || product.SellerId!=currentUser.UserId)
+            if (product == null || product.SellerId != currentUser.UserId)
             {
                 Console.WriteLine("Product not found.");
                 return false;
             }
 
             Product updatedProduct = GetUpdatedProduct(product);
-           
+
             repository.UpdateProduct(updatedProduct);
             Console.WriteLine("Product updated successfully.");
             return true;
@@ -198,12 +206,12 @@ namespace ECommerceClassLibrary.Repositories
 
         }
 
-        public bool DeleteProduct(int productId,User currentUser)
+        public bool DeleteProduct(int productId, User currentUser)
         {
             var product = GetProductById(productId);
-            if (product != null && product.SellerId==currentUser.UserId)
+            if (product != null && product.SellerId == currentUser.UserId)
             {
-            
+
 
                 return repository.DeleteProduct(product);
             }

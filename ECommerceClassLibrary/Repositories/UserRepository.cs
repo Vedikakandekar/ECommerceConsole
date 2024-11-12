@@ -27,8 +27,8 @@ namespace ECommerceClassLibrary.Repositories
 
             if (user != null)
             {
-                
-          return Users.Remove(user);
+
+                return Users.Remove(user);
             }
             return false;
         }
@@ -38,7 +38,9 @@ namespace ECommerceClassLibrary.Repositories
             foreach (var user in Users)
             {
                 if (user.UserId == id)
+                {
                     return user;
+                }
             }
 
             return null;
@@ -46,7 +48,7 @@ namespace ECommerceClassLibrary.Repositories
 
         public (User, bool) ValidateUser(string unm, string pass, UserRole userType)
         {
-           
+
             foreach (var user in Users)
             {
                 if (user.Name == unm & user.Password == pass & user.Role == userType)
@@ -78,7 +80,7 @@ namespace ECommerceClassLibrary.Repositories
         public void ShowProfile(User currentCustomer)
         {
             Console.WriteLine("===== Your Profile =====");
-            Console.WriteLine(currentCustomer.ToString()); 
+            Console.WriteLine(currentCustomer.ToString());
         }
 
         public void EditProfile(User currentCustomer, string field, dynamic newValue)

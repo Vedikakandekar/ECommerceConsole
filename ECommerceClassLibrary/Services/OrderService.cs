@@ -31,22 +31,29 @@ namespace ECommerceClassLibrary.Services
 
             (string street, bool boolstreet) = ValidationHelper.GetValidatedStringInput("Street : ");
             if (!boolstreet)
+            {
+
                 return new Address("", "", "", "");
+            }
 
             (string city, bool boolCity) = ValidationHelper.GetValidatedStringInput("City : ");
             if (!boolCity)
+            {
                 return new Address("", "", "", "");
+            }
 
 
             (string state, bool boolState) = ValidationHelper.GetValidatedStringInput("State : ");
             if (!boolState)
+            {
                 return new Address("", "", "", "");
-
+            }
 
             (string zipCode, bool boolCode) = ValidationHelper.IsValidPinCode("ZipCode  : ");
             if (!boolCode)
+            {
                 return new Address("", "", "", "");
-
+            }
             return new Address(street, city, state, zipCode);
 
         }
@@ -70,7 +77,7 @@ namespace ECommerceClassLibrary.Services
 
             Address shippingAddress = GetShippingAddress();
 
-            if (shippingAddress.Street == "" || shippingAddress.City == "" || shippingAddress.State == "" || shippingAddress.ZipCode == "")
+            if (string.IsNullOrEmpty(shippingAddress.Street ) || string.IsNullOrEmpty(shippingAddress.City)|| string.IsNullOrEmpty(shippingAddress.State)|| string.IsNullOrEmpty(shippingAddress.ZipCode))
             {
                 Console.WriteLine("Shipping Address is not given. Order not placed.");
                 return;
